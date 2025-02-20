@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.table.*;
+import java.io.*;
 
 public class ListByName extends JFrame{
 	private JPanel northPanel;
@@ -49,7 +50,7 @@ public class ListByName extends JFrame{
 		
 		btnReload.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				List contactsList = ContactsDB.getInstance().getContactsList();
+				List contactsList = getAllContacts();
 				//Creating temporary contacts array to sort by name
 			
 				Contact[] tempContactsArray = new Contact[contactsList.size()];
@@ -100,5 +101,34 @@ public class ListByName extends JFrame{
 		int comparissonNumber;
 		comparissonNumber = firstElement.compareTo(secondElement);
 		return comparissonNumber;
+	}
+	
+		//------------------------------------------getAllContacts method--------------------------------------------------------------
+	
+	private List getAllContacts(){
+		List contactsList = new List();
+		try{
+			FileReader fr = new FileReader("Contact.txt");
+			BufferedReader br = new BufferedReader(fr);
+			
+			String line = br.readLine();
+			while (line != null){
+				String [] rowData = line.split(",");
+				String contactId = rowData[0];
+				String name = rowData[1];
+				String contactNumber = rowData[2];
+				String company = rowData[3];
+				double salary = Double.parseDouble(rowData[4]);
+				String birthDay = rowData[5];
+				
+				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
+				contactsList.add(contact);
+				line = br.readLine();
+			}
+		}
+		catch (IOException ex){
+			//
+		}
+		return contactsList;
 	}
 }

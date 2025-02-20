@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.table.*;
+import java.io.*;
 
 public class DeleteContact extends JFrame{
 	private JPanel northPanel;
@@ -139,12 +140,18 @@ public class DeleteContact extends JFrame{
 			public void actionPerformed(ActionEvent evt){
 				String nameOrContactNumber = txtSearch.getText();
 				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
-				List contactsList = ContactsDB.getInstance().getContactsList();
+				List contactsList = getAllContacts();
 				int index = contactsList.indexOf(contact);
 				
 				if(index == -1){
 					JOptionPane.showMessageDialog(null,nameOrContactNumber+" is not exists...");
+					txtContactId.setText("");
 					txtSearch.setText("");
+					txtName.setText("");//Setting txtName text field empty
+					txtContactNumber.setText("");//Setting txtContactNumber text field empty
+					txtCompany.setText("");//Setting txtCompany text field empty
+					txtSalary.setText("");//Setting txtSalary text field empty
+					txtBirthDay.setText("");//Setting txtBirthDay text field empty
 				}else{
 					Contact c1 = contactsList.get(index);
 					txtContactId.setText(c1.getContactId());
@@ -160,8 +167,8 @@ public class DeleteContact extends JFrame{
 		btnDelete.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
 				String nameOrContactNumber = txtSearch.getText();
-				List contactsList = ContactsDB.getInstance().getContactsList();
 				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
+				List contactsList = getAllContacts();
 				int index = contactsList.indexOf(contact);
 				
 				if(index == -1){
@@ -188,7 +195,12 @@ public class DeleteContact extends JFrame{
 						txtSalary.setText("");
 						txtBirthDay.setText("");
 					}
-				}	
+				}
+				for (int i = 0; i < contactsList.size(); i++){
+					Contact c1 = contactsList.get(i);
+					writeContact(c1.getContactId(), c1.getName(), c1.getPhoneNumber(), c1.getCompany(), c1.getSalary(), c1.getBirthDay());
+				}
+					
 			}
 		});
 		
@@ -208,5 +220,47 @@ public class DeleteContact extends JFrame{
 				dispose();
 			}
 		});
+	}
+	//------------------------------------------getAllContacts method--------------------------------------------------------------
+	
+	private List getAllContacts(){
+		List contactsList = new List();
+		try{
+			FileReader fr = new FileReader("Contact.txt");
+			BufferedReader br = new BufferedReader(fr);
+			
+			String line = br.readLine();
+			while (line != null){
+				String [] rowData = line.split(",");
+				String contactId = rowData[0];
+				String name = rowData[1];
+				String contactNumber = rowData[2];
+				String company = rowData[3];
+				double salary = Double.parseDouble(rowData[4]);
+				String birthDay = rowData[5];
+				
+				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
+				contactsList.add(contact);
+				line = br.readLine();
+			}
+		}
+		catch (IOException ex){
+			//
+		}
+		return contactsList;
+	}
+	
+	//--------------------------------------------write contact method-----------------------------------------------------------
+	
+	private void writeContact(String contactId, String name, String contactNumber, String company, double salary, String birthDay){
+		String rawData = contactId+","+name+","+contactNumber+","+company+","+salary+","+birthDay+"\n";
+		
+		try{
+			FileWriter fw = new FileWriter("Contact.txt");
+			fw.write(rawData);
+			fw.close();
+		}catch (IOException ex){
+			//
+		}
 	}
 }

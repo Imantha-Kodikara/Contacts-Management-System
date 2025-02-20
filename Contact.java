@@ -87,7 +87,7 @@ public class Contact{
 	//--------------------------------------toString method------------------------------------------------------------
 	
 	public String toString(){
-		return "{"+contactId+", "+name+", "+phoneNumber+", "+company+", "+salary+", "+birthDay+"}"; 
+		return contactId+","+name+","+phoneNumber+","+company+","+salary+","+birthDay; 
 	}
 	
 	
