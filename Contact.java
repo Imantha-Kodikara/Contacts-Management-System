@@ -89,6 +89,4 @@ public class Contact{
 	public String toString(){
 		return contactId+","+name+","+phoneNumber+","+company+","+salary+","+birthDay; 
 	}
-	
-	
 }

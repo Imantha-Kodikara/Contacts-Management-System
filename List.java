@@ -186,5 +186,4 @@ public class List{
 			this.contact = contact;
 		}
 	}
-
 }

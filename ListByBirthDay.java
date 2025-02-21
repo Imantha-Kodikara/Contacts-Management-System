@@ -50,33 +50,37 @@ public class ListByBirthDay extends JFrame{
 		
 		btnReload.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				List contactsList = getAllContacts();
-				//Creating temporary contacts array to sort by name
+				try{
+					List contactsList = ContactsController.getAllContacts();
+					//Creating temporary contacts array to sort by name
 			
-				Contact[] tempContactsArray = new Contact[contactsList.size()];
+					Contact[] tempContactsArray = new Contact[contactsList.size()];
 	
-				//Copying the elements to contacts array to the temporary contacts array
+					//Copying the elements to contacts array to the temporary contacts array
 			
-				for (int i = 0; i < contactsList.size(); i++){
-					tempContactsArray[i] = contactsList.get(i);
-				}
+					for (int i = 0; i < contactsList.size(); i++){
+						tempContactsArray[i] = contactsList.get(i);
+					}
 				
-				for (int j = tempContactsArray.length - 1; j >= 0; j--){
-					for (int i = 0; i < j; i++){
-						if(comparingStrings((tempContactsArray[i].getBirthDay()), (tempContactsArray[i+1].getBirthDay())) >= 0){
-							Contact temp = tempContactsArray[i];
-							tempContactsArray[i] = tempContactsArray[i+1];
-							tempContactsArray[i+1] = temp;
+					for (int j = tempContactsArray.length - 1; j >= 0; j--){
+						for (int i = 0; i < j; i++){
+							if(comparingStrings((tempContactsArray[i].getBirthDay()), (tempContactsArray[i+1].getBirthDay())) >= 0){
+								Contact temp = tempContactsArray[i];
+								tempContactsArray[i] = tempContactsArray[i+1];
+								tempContactsArray[i+1] = temp;
+							}
 						}
 					}
-				}
 				
-				dtm.setRowCount(0);
+					dtm.setRowCount(0);
 				
-				for (int i = 0; i < tempContactsArray.length; i++){
-					Contact c1 = tempContactsArray[i];
-					Object[] rowData={c1.getContactId(),c1.getName(),c1.getPhoneNumber(),c1.getCompany(), c1.getSalary(), c1.getBirthDay()};
-					dtm.addRow(rowData);		
+					for (int i = 0; i < tempContactsArray.length; i++){
+						Contact c1 = tempContactsArray[i];
+						Object[] rowData={c1.getContactId(),c1.getName(),c1.getPhoneNumber(),c1.getCompany(), c1.getSalary(), c1.getBirthDay()};
+						dtm.addRow(rowData);		
+					}
+				}catch(IOException ex){
+					//
 				}	
 			}
 		});
@@ -104,33 +108,4 @@ public class ListByBirthDay extends JFrame{
 		return comparissonNumber;
 	}
 	
-	//------------------------------------------getAllContacts method--------------------------------------------------------------
-	
-	private List getAllContacts(){
-		List contactsList = new List();
-		try{
-			FileReader fr = new FileReader("Contact.txt");
-			BufferedReader br = new BufferedReader(fr);
-			
-			String line = br.readLine();
-			while (line != null){
-				String [] rowData = line.split(",");
-				String contactId = rowData[0];
-				String name = rowData[1];
-				String contactNumber = rowData[2];
-				String company = rowData[3];
-				double salary = Double.parseDouble(rowData[4]);
-				String birthDay = rowData[5];
-				
-				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
-				contactsList.add(contact);
-				line = br.readLine();
-			}
-		}
-		catch (IOException ex){
-			//
-		}
-		return contactsList;
-		
-	}
 }

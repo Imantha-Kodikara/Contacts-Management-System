@@ -182,17 +182,24 @@ public class AddContact extends JFrame {
 				double salary = Double.parseDouble(txtSalary.getText());//Converting String to double
 				String birthDay = txtBirthDay.getText();
 				
-				writeContact(contactId, name, contactNumber, company, salary, birthDay);
-
-				JOptionPane.showMessageDialog(null,"Contact Number Saved Successfully...");
+				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
 				
-				generateContactId();//Generate next contact ID
-				txtName.setText("");//Setting txtName text field empty
-				txtContactNumber.setText("");//Setting txtContactNumber text field empty
-				txtCompany.setText("");//Setting txtCompany text field empty
-				txtSalary.setText("");//Setting txtSalary text field empty
-				txtBirthDay.setText("");//Setting txtBirthDay text field empty
+				try{
+					boolean isAdded = ContactsController.addContact(contact);//passing the contact object to the ContactsController class to write in to Contact.txt file
 				
+					if(isAdded){
+						JOptionPane.showMessageDialog(null,"Contact Number Saved Successfully...");
+				
+						generateContactId();//Generate next contact ID
+						txtName.setText("");//Setting txtName text field empty
+						txtContactNumber.setText("");//Setting txtContactNumber text field empty
+						txtCompany.setText("");//Setting txtCompany text field empty
+						txtSalary.setText("");//Setting txtSalary text field empty
+						txtBirthDay.setText("");//Setting txtBirthDay text field empty
+					}
+				}catch(IOException ex){
+					//
+				}
 			}
 		});
 		
@@ -341,62 +348,20 @@ public class AddContact extends JFrame {
 	//--------------------------------------------Generate Contact ID Method--------------------------------------------------
 	
 	private void generateContactId(){
-		List contactsList = getAllContacts();
-		if(contactsList.size() <= 0){
-			lblContactId.setText("C0001");//Setting the contact ID as C0001
-		}else{
-			Contact lastContact = contactsList.get(contactsList.size() - 1);
-			String lastId = lastContact.getContactId();
-			int lastIdNumber = Integer.parseInt(lastId.substring(1));
-			String newContactId = String.format("C%04d", (lastIdNumber + 1));
-			
-			
-			//String id = String.format("C%04d",contactsList.size() + 1);//Creating contact id with four digits using current contactsIdArray length
-			lblContactId.setText(newContactId);//Setting the contact ID
-		}
-	}
-	
-	//--------------------------------------------write contact method-----------------------------------------------------------
-	
-	private void writeContact(String contactId, String name, String contactNumber, String company, double salary, String birthDay){
-		String rawData = contactId+","+name+","+contactNumber+","+company+","+salary+","+birthDay+"\n";
-		
 		try{
-			FileWriter fw = new FileWriter("Contact.txt", true);
-			fw.write(rawData);
-			fw.close();
-		}catch (IOException ex){
-			//
-		}
-	}
-	
-	//------------------------------------------getAllContacts method--------------------------------------------------------------
-	
-	private List getAllContacts(){
-		List contactsList = new List();
-		try{
-			FileReader fr = new FileReader("Contact.txt");
-			BufferedReader br = new BufferedReader(fr);
-			
-			String line = br.readLine();
-			while (line != null){
-				String [] rowData = line.split(",");
-				String contactId = rowData[0];
-				String name = rowData[1];
-				String contactNumber = rowData[2];
-				String company = rowData[3];
-				double salary = Double.parseDouble(rowData[4]);
-				String birthDay = rowData[5];
-				
-				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
-				contactsList.add(contact);
-				line = br.readLine();
+			Contact lastContact = ContactsController.lastConact();
+			if(lastContact == null){
+				lblContactId.setText("C0001");//Setting the contact ID as C0001
+			}else{
+				String lastId = lastContact.getContactId();
+				int lastIdNumber = Integer.parseInt(lastId.substring(1));
+				String newContactId = String.format("C%04d", (lastIdNumber + 1));
+						
+				//String id = String.format("C%04d",contactsList.size() + 1);//Creating contact id with four digits using current contactsIdArray length
+				lblContactId.setText(newContactId);//Setting the contact ID
 			}
-		}
-		catch (IOException ex){
+		}catch(IOException ex){	
 			//
 		}
-		return contactsList;
-		
 	}
 }

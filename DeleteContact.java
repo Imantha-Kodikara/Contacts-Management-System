@@ -139,68 +139,62 @@ public class DeleteContact extends JFrame{
 		btnSearch.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
 				String nameOrContactNumber = txtSearch.getText();
-				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
-				List contactsList = getAllContacts();
-				int index = contactsList.indexOf(contact);
+				try{
+					Contact contact = ContactsController.searchContact(nameOrContactNumber);
 				
-				if(index == -1){
-					JOptionPane.showMessageDialog(null,nameOrContactNumber+" is not exists...");
-					txtContactId.setText("");
-					txtSearch.setText("");
-					txtName.setText("");//Setting txtName text field empty
-					txtContactNumber.setText("");//Setting txtContactNumber text field empty
-					txtCompany.setText("");//Setting txtCompany text field empty
-					txtSalary.setText("");//Setting txtSalary text field empty
-					txtBirthDay.setText("");//Setting txtBirthDay text field empty
-				}else{
-					Contact c1 = contactsList.get(index);
-					txtContactId.setText(c1.getContactId());
-					txtName.setText(c1.getName());
-					txtContactNumber.setText(c1.getPhoneNumber());
-					txtCompany.setText(c1.getCompany());
-					txtSalary.setText(String.valueOf(c1.getSalary())); //String.valueOf()---> converting double to string
-					txtBirthDay.setText(c1.getBirthDay());
+					if(contact == null){
+						JOptionPane.showMessageDialog(null,nameOrContactNumber+" is not exists...");
+						txtContactId.setText(""); 
+						txtSearch.setText("");
+						txtName.setText("");//Setting txtName text field empty
+						txtContactNumber.setText("");//Setting txtContactNumber text field empty
+						txtCompany.setText("");//Setting txtCompany text field empty
+						txtSalary.setText("");//Setting txtSalary text field empty
+						txtBirthDay.setText("");//Setting txtBirthDay text field empty
+					}else{
+						txtContactId.setText(contact.getContactId());
+						txtName.setText(contact.getName());
+						txtContactNumber.setText(contact.getPhoneNumber());
+						txtCompany.setText(contact.getCompany());
+						txtSalary.setText(String.valueOf(contact.getSalary())); //String.valueOf()---> converting double to string
+						txtBirthDay.setText(contact.getBirthDay());
+					}
+				}catch(IOException ex){
+					//
 				}
 			}
 		});
 		
 		btnDelete.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				String nameOrContactNumber = txtSearch.getText();
-				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
-				List contactsList = getAllContacts();
-				int index = contactsList.indexOf(contact);
-				
-				if(index == -1){
-					JOptionPane.showMessageDialog(null,nameOrContactNumber+"No contact available for deletion...");
-					txtSearch.setText("");
-				}else{
-					int option = JOptionPane.showConfirmDialog(null, "Do you want to proceed with this Deletion ?", "Confirmation", JOptionPane.YES_NO_OPTION);
-					if(option == JOptionPane.YES_OPTION){
-						contactsList.remove(index);
-						
-						JOptionPane.showMessageDialog(null,"Contact Deleted Successfully...");
-						
-						txtContactId.setText("");
-						txtName.setText("");
-						txtContactNumber.setText("");
-						txtCompany.setText("");
-						txtSalary.setText("");
-						txtBirthDay.setText("");
-					}else{
-						txtContactId.setText("");
-						txtName.setText("");
-						txtContactNumber.setText("");
-						txtCompany.setText("");
-						txtSalary.setText("");
-						txtBirthDay.setText("");
-					}
-				}
-				for (int i = 0; i < contactsList.size(); i++){
-					Contact c1 = contactsList.get(i);
-					writeContact(c1.getContactId(), c1.getName(), c1.getPhoneNumber(), c1.getCompany(), c1.getSalary(), c1.getBirthDay());
-				}
+				int option = JOptionPane.showConfirmDialog(null, "Do you want to proceed with this Deletion ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION){
+					String contactId = txtContactId.getText();
+					String name = txtName.getText();
+					String phoneNumber = txtContactNumber.getText();
+					String company = txtCompany.getText();
+					double salary = Double.parseDouble(txtSalary.getText());
+					String birthDay = txtBirthDay.getText();
 					
+					Contact contact = new Contact(contactId, name, phoneNumber, company, salary, birthDay);
+				
+					try{
+						boolean isDelete = ContactsController.deleteContact(contact);
+					
+						if(isDelete){
+							JOptionPane.showMessageDialog(null,"Contact Deleted Successfully...");
+							txtContactId.setText(""); 
+							txtSearch.setText("");
+							txtName.setText("");//Setting txtName text field empty
+							txtContactNumber.setText("");//Setting txtContactNumber text field empty
+							txtCompany.setText("");//Setting txtCompany text field empty
+							txtSalary.setText("");//Setting txtSalary text field empty
+							txtBirthDay.setText("");//Setting txtBirthDay text field empty
+						}
+					}catch(IOException ex){
+						//
+					}
+				}		
 			}
 		});
 		
@@ -256,7 +250,7 @@ public class DeleteContact extends JFrame{
 		String rawData = contactId+","+name+","+contactNumber+","+company+","+salary+","+birthDay+"\n";
 		
 		try{
-			FileWriter fw = new FileWriter("Contact.txt");
+			FileWriter fw = new FileWriter("Contact.txt", true);
 			fw.write(rawData);
 			fw.close();
 		}catch (IOException ex){

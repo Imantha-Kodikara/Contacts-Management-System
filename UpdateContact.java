@@ -175,77 +175,68 @@ public class UpdateContact extends JFrame{
 		btnSearch.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
 				String nameOrContactNumber = txtSearch.getText();
-				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
-				List contactsList = getAllContacts();
-				int index = contactsList.indexOf(contact);
+				try{
+					Contact contact = ContactsController.searchContact(nameOrContactNumber);
 				
-				if(index == -1){
-					JOptionPane.showMessageDialog(null,nameOrContactNumber+" is not exists...");
-					txtContactId.setText("");
-					txtSearch.setText("");
-					txtName.setText("");//Setting txtName text field empty
-					txtContactNumber.setText("");//Setting txtContactNumber text field empty
-					txtCompany.setText("");//Setting txtCompany text field empty
-					txtSalary.setText("");//Setting txtSalary text field empty
-					txtBirthDay.setText("");//Setting txtBirthDay text field empty
-				}else{
-					Contact c1 = contactsList.get(index);
-					txtContactId.setText(c1.getContactId());
-					txtName.setText(c1.getName());
-					txtContactNumber.setText(c1.getPhoneNumber());
-					txtCompany.setText(c1.getCompany());
-					txtSalary.setText(String.valueOf(c1.getSalary())); //String.valueOf()---> converting double to string
-					txtBirthDay.setText(c1.getBirthDay());
+					if(contact == null){
+						JOptionPane.showMessageDialog(null,nameOrContactNumber+" is not exists...");
+						txtContactId.setText(""); 
+						txtSearch.setText("");
+						txtName.setText("");//Setting txtName text field empty
+						txtContactNumber.setText("");//Setting txtContactNumber text field empty
+						txtCompany.setText("");//Setting txtCompany text field empty
+						txtSalary.setText("");//Setting txtSalary text field empty
+						txtBirthDay.setText("");//Setting txtBirthDay text field empty
+					}else{
+						txtContactId.setText(contact.getContactId());
+						txtContactId.setEditable(false);
+						txtName.setText(contact.getName());
+						txtContactNumber.setText(contact.getPhoneNumber());
+						txtCompany.setText(contact.getCompany());
+						txtSalary.setText(String.valueOf(contact.getSalary())); //String.valueOf()---> converting double to string
+						txtBirthDay.setText(contact.getBirthDay());
+					}
+				}catch(IOException ex){
+					//
 				}
 			}
 		});
 		
 		btnUpdate.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				String nameOrContactNumber = txtSearch.getText();
-				List contactsList = getAllContacts();
-				Contact contact = new Contact(null, nameOrContactNumber, nameOrContactNumber, null, 0.0, null);
-				
-				int index = contactsList.indexOf(contact);
-				
-				if(index == -1){
-					JOptionPane.showMessageDialog(null,nameOrContactNumber+"Cannot update empty contact...");
-					txtSearch.setText("");
-				}else{
-					int option = JOptionPane.showConfirmDialog(null, "Do you want to proceed with this Update ?", "Confirmation", JOptionPane.YES_NO_OPTION);
-					if(option == JOptionPane.YES_OPTION){
-						String contactId = txtContactId.getText();
-						String name = txtName.getText();
-						String phoneNumber = txtContactNumber.getText();
-						String company = txtCompany.getText();
-						double salary = Double.parseDouble(txtSalary.getText());
-						String birthDay = txtBirthDay.getText();
-						
-						Contact c1 = new Contact(contactId, name, phoneNumber, company, salary, birthDay);
-						contactsList.set(index, c1);
-						
-						JOptionPane.showMessageDialog(null,"Contact Updated Successfully...");
-						
-						txtContactId.setText("");
-						txtName.setText("");
-						txtContactNumber.setText("");
-						txtCompany.setText("");
-						txtSalary.setText("");
-						txtBirthDay.setText("");
-					}else{
-						txtContactId.setText("");
-						txtName.setText("");
-						txtContactNumber.setText("");
-						txtCompany.setText("");
-						txtSalary.setText("");
-						txtBirthDay.setText("");
+					String contactId = txtContactId.getText();
+					String name = txtName.getText();
+					String phoneNumber = txtContactNumber.getText();
+					String company = txtCompany.getText();
+					double salary = Double.parseDouble(txtSalary.getText());
+					String birthDay = txtBirthDay.getText();
+					
+					Contact contact = new Contact(contactId, name, phoneNumber, company, salary, birthDay);
+					try{
+						boolean isUpdate = ContactsController.updateContact(contact);
+					
+						if(isUpdate){
+							int option = JOptionPane.showConfirmDialog(null, "Do you want to proceed with this Update ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+							if(option == JOptionPane.YES_OPTION){
+							JOptionPane.showMessageDialog(null,"Contact Updated Successfully...");
+								txtContactId.setText("");
+								txtName.setText("");
+								txtContactNumber.setText("");
+								txtCompany.setText("");
+								txtSalary.setText("");
+								txtBirthDay.setText("");
+							}else{
+								txtContactId.setText("");
+								txtName.setText("");
+								txtContactNumber.setText("");
+								txtCompany.setText("");
+								txtSalary.setText("");
+								txtBirthDay.setText("");
+							}
+						}
+					}catch(IOException ex){
+						//
 					}
-				}
-				for (int i = 0; i < contactsList.size(); i++){
-					Contact c1 = contactsList.get(i);
-					writeContact(c1.getContactId(), c1.getName(), c1.getPhoneNumber(), c1.getCompany(), c1.getSalary(), c1.getBirthDay());
-				}
-				
 			}
 		});
 		
@@ -373,48 +364,5 @@ public class UpdateContact extends JFrame{
 				actualNumberOfDates = 29;	
 		}
 		return actualNumberOfDates;
-	}
-	
-		//------------------------------------------getAllContacts method--------------------------------------------------------------
-	
-	private List getAllContacts(){
-		List contactsList = new List();
-		try{
-			FileReader fr = new FileReader("Contact.txt");
-			BufferedReader br = new BufferedReader(fr);
-			
-			String line = br.readLine();
-			while (line != null){
-				String [] rowData = line.split(",");
-				String contactId = rowData[0];
-				String name = rowData[1];
-				String contactNumber = rowData[2];
-				String company = rowData[3];
-				double salary = Double.parseDouble(rowData[4]);
-				String birthDay = rowData[5];
-				
-				Contact contact = new Contact(contactId, name, contactNumber, company, salary, birthDay);
-				contactsList.add(contact);
-				line = br.readLine();
-			}
-		}
-		catch (IOException ex){
-			//
-		}
-		return contactsList;
-	}
-	
-	//--------------------------------------------write contact method-----------------------------------------------------------
-	
-	private void writeContact(String contactId, String name, String contactNumber, String company, double salary, String birthDay){
-		String rawData = contactId+","+name+","+contactNumber+","+company+","+salary+","+birthDay+"\n";
-		
-		try{
-			FileWriter fw = new FileWriter("Contact.txt", true);
-			fw.write(rawData);
-			fw.close();
-		}catch (IOException ex){
-			//
-		}
 	}
 }
